@@ -23,6 +23,7 @@
 ****************************************************************************/
 
 #include "fp16.h"
+#include <math.h>
 
 float htof(half h)
 {
@@ -89,4 +90,34 @@ half ftoh(float f)
 	// else;									// 0.0, -0.0 or loss of precision
 
 	return *((half *)&hval);
+}
+
+bool is_ftoh_loss(float f)
+{
+	if (f == 0.0 || !isfinite(f) || isnan(f))
+	{
+		return false;
+	}
+
+	uint32_t *p = (uint32_t *)(&f);
+	int32_t mant = *p & 0x7fffff;
+	uint16_t exp = (*p >> 23) & 0xff;
+
+	if (exp >= 0x71 && exp < 0x8f)
+	{
+		if (!(mant & 0x1fff))
+		{
+			return false;
+		}
+	}
+
+	if (exp >= 0x67 && exp < 0x71)
+	{
+		if (!(mant & ((1 << (0x7e - exp)) - 1)))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
