@@ -30,12 +30,15 @@
 
 #ifdef __cplusplus
 extern "C" {
+#else
+#include <stdbool.h>
 #endif
 
 typedef unsigned short half;
 
 float htof(half h);
 half ftoh(float f);
+bool is_ftoh_loss(float f);
 
 #ifdef __cplusplus
 }
